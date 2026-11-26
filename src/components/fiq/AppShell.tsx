@@ -1,11 +1,11 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeftRight, ChevronsLeft, ChevronsRight, LayoutGrid, LogOut, Siren, Users } from "lucide-react";
+import { ArrowLeftRight, ChevronsLeft, ChevronsRight, LayoutGrid, LogOut, Siren, Users, Receipt, Landmark, ShieldCheck, Package, FolderSearch, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { CURRENCIES } from "@/lib/currency";
-import { ROLE_LABEL } from "@/lib/roles";
+import { ROLE_LABEL, can } from "@/lib/roles";
 import { Logo } from "./Logo";
 import { OrgProvider, useOrg } from "./org-context";
 import { Onboarding } from "./Onboarding";
@@ -14,6 +14,12 @@ const NAV = [
   { to: "/dashboard", label: "Overview", icon: LayoutGrid },
   { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
   { to: "/alerts", label: "Alerts & Incidents", icon: Siren },
+  { to: "/expenses", label: "Expense Analysis", icon: Receipt },
+  { to: "/cash", label: "Cash Reconciliation", icon: Landmark },
+  { to: "/monitoring", label: "Employee & Supplier", icon: ShieldCheck },
+  { to: "/inventory", label: "Inventory", icon: Package },
+  { to: "/investigations", label: "Investigations", icon: FolderSearch },
+  { to: "/audit", label: "Audit Trail", icon: History },
   { to: "/team", label: "Team & Roles", icon: Users },
 ] as const;
 
@@ -29,6 +35,7 @@ function Shell() {
 
   if (loading) return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading workspace…</div>;
   if (!current) return <Onboarding />;
+  const nav=can.viewAll(current.role)?NAV:NAV.filter(n=>["/dashboard","/transactions","/team"].includes(n.to));
 
   return (
     <div className="min-h-screen p-3 md:p-4">
@@ -51,11 +58,11 @@ function Shell() {
       </header>
       <div className="flex gap-3">
         <aside className={`${collapsed ? "w-14" : "w-52"} hidden shrink-0 rounded-xl bg-sidebar p-2 text-sidebar-foreground transition-all md:block`}>
-          <button onClick={() => setCollapsed(!collapsed)} className="mb-3 flex w-full items-center gap-2 rounded-md bg-sidebar-accent px-3 py-2 text-xs text-sidebar-accent-foreground">
+          <Button variant="ghost" title={collapsed ? "Expand navigation" : "Collapse navigation"} onClick={() => setCollapsed(!collapsed)} className="mb-3 flex w-full justify-start gap-2 rounded-md bg-sidebar-accent px-3 py-2 text-xs text-sidebar-accent-foreground">
             {collapsed ? <ChevronsRight className="size-4" /> : <><ChevronsLeft className="size-4" />Hide panel</>}
-          </button>
+          </Button>
           <nav className="space-y-1">
-            {NAV.map((n) => {
+            {nav.map((n) => {
               const active = path.startsWith(n.to);
               return (
                 <Link key={n.to} to={n.to} title={n.label}
@@ -68,9 +75,9 @@ function Shell() {
         </aside>
         <main className="min-w-0 flex-1 pb-16 md:pb-0"><Outlet /></main>
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t bg-sidebar py-2 text-sidebar-foreground md:hidden">
-        {NAV.map((n) => (
-          <Link key={n.to} to={n.to} className={`flex flex-col items-center gap-0.5 text-[10px] ${path.startsWith(n.to) ? "text-sidebar-primary" : ""}`}>
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex gap-2 overflow-x-auto border-t bg-sidebar px-2 py-2 text-sidebar-foreground md:hidden">
+        {nav.map((n) => (
+          <Link key={n.to} to={n.to} title={n.label} className={`flex min-w-16 shrink-0 flex-col items-center gap-0.5 text-[10px] ${path.startsWith(n.to) ? "text-sidebar-primary" : ""}`}>
             <n.icon className="size-5" />{n.label.split(" ")[0]}
           </Link>
         ))}

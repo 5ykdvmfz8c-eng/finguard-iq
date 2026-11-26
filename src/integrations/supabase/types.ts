@@ -19,8 +19,10 @@ export type Database = {
           alert_type: string
           code: string
           created_at: string
+          detection_key: string | null
           evidence: Json
           id: string
+          monitoring_record_id: string | null
           org_id: string
           owner: string | null
           related_ids: string[]
@@ -34,8 +36,10 @@ export type Database = {
           alert_type: string
           code: string
           created_at?: string
+          detection_key?: string | null
           evidence?: Json
           id?: string
+          monitoring_record_id?: string | null
           org_id: string
           owner?: string | null
           related_ids?: string[]
@@ -49,8 +53,10 @@ export type Database = {
           alert_type?: string
           code?: string
           created_at?: string
+          detection_key?: string | null
           evidence?: Json
           id?: string
+          monitoring_record_id?: string | null
           org_id?: string
           owner?: string | null
           related_ids?: string[]
@@ -61,6 +67,13 @@ export type Database = {
           transaction_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "alerts_monitoring_tenant_fk"
+            columns: ["org_id", "monitoring_record_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_records"
+            referencedColumns: ["org_id", "id"]
+          },
           {
             foreignKeyName: "alerts_org_id_fkey"
             columns: ["org_id"]
@@ -74,6 +87,254 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "transactions"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity: string
+          entity_id: string
+          id: string
+          org_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity: string
+          entity_id: string
+          id?: string
+          org_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity?: string
+          entity_id?: string
+          id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_documents: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          created_by: string
+          filename: string
+          id: string
+          org_id: string
+          record_id: string | null
+          storage_path: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          created_by?: string
+          filename: string
+          id?: string
+          org_id: string
+          record_id?: string | null
+          storage_path: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          created_by?: string
+          filename?: string
+          id?: string
+          org_id?: string
+          record_id?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_documents_org_id_case_id_fkey"
+            columns: ["org_id", "case_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "evidence_documents_org_id_record_id_fkey"
+            columns: ["org_id", "record_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_records"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      investigation_notes: {
+        Row: {
+          body: string
+          case_id: string
+          created_at: string
+          created_by: string
+          id: string
+          org_id: string
+        }
+        Insert: {
+          body: string
+          case_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_id: string
+        }
+        Update: {
+          body?: string
+          case_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investigation_notes_org_id_case_id_fkey"
+            columns: ["org_id", "case_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      investigations: {
+        Row: {
+          alert_id: string
+          assigned_to: string | null
+          created_at: string
+          created_by: string
+          evidence_snapshot: Json
+          id: string
+          org_id: string
+          outcome: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_id: string
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string
+          evidence_snapshot?: Json
+          id?: string
+          org_id: string
+          outcome?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_id?: string
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string
+          evidence_snapshot?: Json
+          id?: string
+          org_id?: string
+          outcome?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investigations_org_id_alert_id_fkey"
+            columns: ["org_id", "alert_id"]
+            isOneToOne: true
+            referencedRelation: "alerts"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "investigations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_records: {
+        Row: {
+          created_at: string
+          created_by: string
+          currency: string
+          id: string
+          kind: string
+          label: string
+          org_id: string
+          payload: Json
+          record_date: string
+          replaces_id: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          currency?: string
+          id?: string
+          kind: string
+          label: string
+          org_id: string
+          payload?: Json
+          record_date: string
+          replaces_id?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          currency?: string
+          id?: string
+          kind?: string
+          label?: string
+          org_id?: string
+          payload?: Json
+          record_date?: string
+          replaces_id?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_records_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_records_org_id_replaces_id_fkey"
+            columns: ["org_id", "replaces_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_records"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "monitoring_records_org_id_transaction_id_fkey"
+            columns: ["org_id", "transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["org_id", "id"]
           },
         ]
       }

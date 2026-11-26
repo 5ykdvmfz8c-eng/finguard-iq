@@ -18,4 +18,5 @@ export const STATUS_STYLE: Record<string, string> = {
 export const TYPE_LABEL: Record<string, string> = {
   duplicate_invoice: "Duplicate invoice", duplicate_amount: "Repeated amount", split_payment: "Split payment",
   amount_outlier: "Unusual amount", over_limit: "Over approval limit",
+  expense_irregularity: "Expense irregularity", cash_irregularity: "Cash discrepancy", supplier_irregularity: "Supplier irregularity", inventory_irregularity: "Inventory discrepancy", control_irregularity: "Employee / payment control",
 };
